@@ -4,8 +4,6 @@ import com.f1simulator.model.Circuito;
 import com.f1simulator.model.TipoClima;
 import com.f1simulator.repository.CircuitoRepository;
 import com.f1simulator.model.GanadorHistorico;
-import com.f1simulator.model.RecordVuelta;
-
 import javax.swing.JOptionPane;
 import java.util.Optional;
 
@@ -54,15 +52,6 @@ public class CircuitoUI {
 
     private void agregarCircuito() {
         try {
-            String id = JOptionPane.showInputDialog("Ingrese el ID del circuito:");
-            if (id == null || id.trim().isEmpty())
-                return;
-
-            if (circuitoRepository.buscarPorId(id).isPresent()) {
-                JOptionPane.showMessageDialog(null, "Ya existe un circuito con ese ID.");
-                return;
-            }
-
             String nombre = JOptionPane.showInputDialog("Ingrese el nombre del circuito:");
             if (nombre == null || nombre.trim().isEmpty())
                 return;
@@ -92,9 +81,9 @@ public class CircuitoUI {
             if (climaPromedio == null)
                 return;
 
-            Circuito nuevoCircuito = new Circuito(id, nombre, pais, longitudKm, vueltas, descripcion, climaPromedio);
+            Circuito nuevoCircuito = new Circuito(0, nombre, pais, longitudKm, vueltas, descripcion, climaPromedio);
             circuitoRepository.guardar(nuevoCircuito);
-            JOptionPane.showMessageDialog(null, "Circuito agregado exitosamente.");
+            JOptionPane.showMessageDialog(null, "Circuito agregado exitosamente. ID asignado: " + nuevoCircuito.getId());
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Error: Ingrese un valor numérico válido para longitud o vueltas.",
@@ -106,9 +95,8 @@ public class CircuitoUI {
     }
 
     private void editarCircuito() {
-        String id = JOptionPane.showInputDialog("Ingrese el ID del circuito a editar:");
-        if (id == null || id.trim().isEmpty())
-            return;
+        Integer id = pedirId("Ingrese el ID del circuito a editar:");
+        if (id == null) return;
 
         Optional<Circuito> circuitoOpt = circuitoRepository.buscarPorId(id);
         if (circuitoOpt.isEmpty()) {
@@ -165,9 +153,8 @@ public class CircuitoUI {
     }
 
     private void eliminarCircuito() {
-        String id = JOptionPane.showInputDialog("Ingrese el ID del circuito a eliminar:");
-        if (id == null || id.trim().isEmpty())
-            return;
+        Integer id = pedirId("Ingrese el ID del circuito a eliminar:");
+        if (id == null) return;
 
         int confirmacion = JOptionPane.showConfirmDialog(null,
                 "¿Está seguro que desea eliminar el circuito " + id + "?", "Confirmar Eliminación",
@@ -183,18 +170,22 @@ public class CircuitoUI {
     }
 
     private void buscarCircuito() {
-        String id = JOptionPane
+        String idStr = JOptionPane
                 .showInputDialog("Ingrese el ID del circuito a buscar (o cancele para buscar por nombre/país):");
 
-        if (id != null && !id.trim().isEmpty()) {
-            Optional<Circuito> c = circuitoRepository.buscarPorId(id);
-            if (c.isPresent()) {
-                JOptionPane.showMessageDialog(null, c.get().toString());
-            } else {
-                JOptionPane.showMessageDialog(null, "No se encontró un circuito con el ID " + id);
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                Integer id = Integer.parseInt(idStr.trim());
+                Optional<Circuito> c = circuitoRepository.buscarPorId(id);
+                if (c.isPresent()) {
+                    JOptionPane.showMessageDialog(null, c.get().toString());
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se encontró un circuito con el ID " + id);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "El ID debe ser un número.", "Error de formato", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            // Busqueda por nombre o pais como piden las reglas (opcionalmente)
             String query = JOptionPane.showInputDialog("Ingrese el nombre o país del circuito a buscar:");
             if (query == null || query.trim().isEmpty())
                 return;
@@ -271,5 +262,16 @@ public class CircuitoUI {
 
         JOptionPane.showMessageDialog(null, detalle.toString(), "Detalles - " + circuitoEncontrado.getNombre(),
                 JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private Integer pedirId(String mensaje) {
+        String valor = JOptionPane.showInputDialog(mensaje);
+        if (valor == null || valor.trim().isEmpty()) return null;
+        try {
+            return Integer.parseInt(valor.trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El ID debe ser un número.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+            return pedirId(mensaje);
+        }
     }
 }
