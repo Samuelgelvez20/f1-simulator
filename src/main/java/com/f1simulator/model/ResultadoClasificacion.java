@@ -44,6 +44,7 @@ public class ResultadoClasificacion {
     public void setPosicion(int posicion) { this.posicion = posicion; }
 
     public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
     @Override
     public String toString() {

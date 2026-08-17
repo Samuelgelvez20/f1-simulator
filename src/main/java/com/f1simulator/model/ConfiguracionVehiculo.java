@@ -40,6 +40,7 @@ public class ConfiguracionVehiculo {
     public String getPresionNeumaticos() { return presionNeumaticos; }
     public String getEstrategiaCombustible() { return estrategiaCombustible; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 
     @Override
     public String toString() {
