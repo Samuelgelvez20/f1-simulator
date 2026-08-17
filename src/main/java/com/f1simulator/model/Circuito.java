@@ -1,7 +1,7 @@
 package com.f1simulator.model;
 
 public class Circuito {
-    private String id;
+    private int id;
     private String nombre;
     private String pais;
     private double longitudKm;
@@ -11,7 +11,7 @@ public class Circuito {
     private RecordVuelta recordVuelta;
     private java.util.List<GanadorHistorico> ganadores;
 
-    public Circuito(String id, String nombre, String pais, double longitudKm, int vueltas, String descripcion,
+    public Circuito(int id, String nombre, String pais, double longitudKm, int vueltas, String descripcion,
             TipoClima climaPromedio) {
         this.id = id;
         this.nombre = nombre;
@@ -23,11 +23,11 @@ public class Circuito {
         this.ganadores = new java.util.ArrayList<>();
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -101,7 +101,7 @@ public class Circuito {
 
     @Override
     public String toString() {
-        return String.format("Circuito [ID=%s, Nombre=%s, País=%s, Longitud=%.2f km, Vueltas=%d, Clima=%s]",
+        return String.format("Circuito [ID=%d, Nombre=%s, País=%s, Longitud=%.2f km, Vueltas=%d, Clima=%s]",
                 id, nombre, pais, longitudKm, vueltas, climaPromedio);
     }
 }
