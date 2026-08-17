@@ -6,6 +6,9 @@ import com.f1simulator.repository.EquipoRepository;
 import com.f1simulator.repository.PilotoRepository;
 
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import java.util.Optional;
 
 public class PilotoUI {
@@ -21,7 +24,8 @@ public class PilotoUI {
     public void mostrarMenu() {
         boolean salir = false;
         while (!salir) {
-            String[] opciones = { "Registrar Piloto", "Editar Piloto", "Eliminar Piloto", "Listar Todos", "Volver" };
+            String[] opciones = { "Registrar Piloto", "Editar Piloto", "Eliminar Piloto", "Listar Todos",
+                    "Listar (JTable)", "Volver" };
             int seleccion = JOptionPane.showOptionDialog(null, "Menú de Pilotos", "Gestión de Pilotos",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
 
@@ -39,6 +43,9 @@ public class PilotoUI {
                     listarPilotos();
                     break;
                 case 4:
+                    mostrarListaPilotos();
+                    break;
+                case 5:
                 case JOptionPane.CLOSED_OPTION:
                     salir = true;
                     break;
@@ -190,5 +197,26 @@ public class PilotoUI {
             sb.append("No hay pilotos registrados.");
         }
         JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private void mostrarListaPilotos() {
+        if (pilotoRepository.listarTodos().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay pilotos registrados.", "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] columnas = { "ID", "Nombre", "Equipo", "Rol" };
+        DefaultTableModel model = new DefaultTableModel(columnas, 0);
+
+        for (Piloto p : pilotoRepository.listarTodos()) {
+            String nombreEquipo = p.getEquipo() != null ? p.getEquipo().getNombre() : "Sin equipo";
+            model.addRow(new Object[] { p.getId(), p.getNombre(), nombreEquipo, p.getRol() });
+        }
+
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JOptionPane.showMessageDialog(null, scrollPane, "Lista de Pilotos", JOptionPane.PLAIN_MESSAGE);
     }
 }

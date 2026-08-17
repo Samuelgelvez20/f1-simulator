@@ -3,6 +3,8 @@ package com.f1simulator.ui;
 import com.f1simulator.model.Circuito;
 import com.f1simulator.model.TipoClima;
 import com.f1simulator.repository.CircuitoRepository;
+import com.f1simulator.model.GanadorHistorico;
+import com.f1simulator.model.RecordVuelta;
 
 import javax.swing.JOptionPane;
 import java.util.Optional;
@@ -19,7 +21,7 @@ public class CircuitoUI {
         boolean salir = false;
         while (!salir) {
             String[] opciones = { "Agregar Circuito", "Editar Circuito", "Eliminar Circuito", "Buscar Circuito",
-                    "Listar Todos", "Volver" };
+                    "Listar Todos", "Mostrar Detalle", "Volver" };
             int seleccion = JOptionPane.showOptionDialog(null, "Menú de Circuitos", "Gestión de Circuitos",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
 
@@ -40,6 +42,9 @@ public class CircuitoUI {
                     listarCircuitos();
                     break;
                 case 5:
+                    mostrarDetalleCircuito();
+                    break;
+                case 6:
                 case JOptionPane.CLOSED_OPTION:
                     salir = true;
                     break;
@@ -219,5 +224,52 @@ public class CircuitoUI {
             sb.append("No hay circuitos registrados.");
         }
         JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private void mostrarDetalleCircuito() {
+        String query = JOptionPane.showInputDialog("Ingrese el nombre del circuito para ver detalles:");
+        if (query == null || query.trim().isEmpty())
+            return;
+
+        Circuito circuitoEncontrado = null;
+        for (Circuito c : circuitoRepository.listarTodos()) {
+            if (c.getNombre().equalsIgnoreCase(query.trim())) {
+                circuitoEncontrado = c;
+                break;
+            }
+        }
+
+        if (circuitoEncontrado == null) {
+            JOptionPane.showMessageDialog(null, "No se encontró el circuito especificado.");
+            return;
+        }
+
+        StringBuilder detalle = new StringBuilder();
+        detalle.append("--- DETALLE DE CIRCUITO ---\n");
+        detalle.append("Nombre: ").append(circuitoEncontrado.getNombre()).append("\n");
+        detalle.append("País: ").append(circuitoEncontrado.getPais()).append("\n");
+        detalle.append("Longitud: ").append(circuitoEncontrado.getLongitudKm()).append(" km\n");
+        detalle.append("Vueltas: ").append(circuitoEncontrado.getVueltas()).append("\n");
+        detalle.append("Clima Promedio: ").append(circuitoEncontrado.getClimaPromedio()).append("\n");
+        detalle.append("Descripción: ").append(circuitoEncontrado.getDescripcion()).append("\n\n");
+
+        detalle.append("-- RÉCORD DE VUELTA --\n");
+        if (circuitoEncontrado.getRecordVuelta() != null) {
+            detalle.append(circuitoEncontrado.getRecordVuelta().toString()).append("\n\n");
+        } else {
+            detalle.append("Sin récord registrado.\n\n");
+        }
+
+        detalle.append("-- HISTORIAL DE GANADORES --\n");
+        if (circuitoEncontrado.getGanadores() != null && !circuitoEncontrado.getGanadores().isEmpty()) {
+            for (GanadorHistorico g : circuitoEncontrado.getGanadores()) {
+                detalle.append("- ").append(g.toString()).append("\n");
+            }
+        } else {
+            detalle.append("Sin ganadores registrados.\n");
+        }
+
+        JOptionPane.showMessageDialog(null, detalle.toString(), "Detalles - " + circuitoEncontrado.getNombre(),
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }

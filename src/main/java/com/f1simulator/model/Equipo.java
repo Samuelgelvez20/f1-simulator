@@ -4,11 +4,13 @@ public class Equipo {
     private String nombre; // Actúa como ID
     private String pais;
     private String motor;
+    private java.util.List<Piloto> pilotos;
 
     public Equipo(String nombre, String pais, String motor) {
         this.nombre = nombre;
         this.pais = pais;
         this.motor = motor;
+        this.pilotos = new java.util.ArrayList<>();
     }
 
     public String getNombre() {
@@ -33,6 +35,20 @@ public class Equipo {
 
     public void setMotor(String motor) {
         this.motor = motor;
+    }
+
+    public java.util.List<Piloto> getPilotos() {
+        return pilotos;
+    }
+
+    public void agregarPiloto(Piloto piloto) {
+        if (!this.pilotos.contains(piloto)) {
+            this.pilotos.add(piloto);
+        }
+    }
+
+    public void removerPiloto(Piloto piloto) {
+        this.pilotos.remove(piloto);
     }
 
     @Override

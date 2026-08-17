@@ -4,7 +4,12 @@ import com.f1simulator.model.Equipo;
 import com.f1simulator.repository.EquipoRepository;
 
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import com.f1simulator.model.Piloto;
 
 public class EquipoUI {
 
@@ -17,7 +22,8 @@ public class EquipoUI {
     public void mostrarMenu() {
         boolean salir = false;
         while (!salir) {
-            String[] opciones = { "Registrar Equipo", "Editar Equipo", "Eliminar Equipo", "Listar Todos", "Volver" };
+            String[] opciones = { "Registrar Equipo", "Editar Equipo", "Eliminar Equipo", "Listar Todos",
+                    "Listar (JTable)", "Volver" };
             int seleccion = JOptionPane.showOptionDialog(null, "Menú de Equipos", "Gestión de Equipos",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
 
@@ -35,6 +41,9 @@ public class EquipoUI {
                     listarEquipos();
                     break;
                 case 4:
+                    mostrarListaEquipos();
+                    break;
+                case 5:
                 case JOptionPane.CLOSED_OPTION:
                     salir = true;
                     break;
@@ -130,5 +139,27 @@ public class EquipoUI {
             sb.append("No hay equipos registrados.");
         }
         JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private void mostrarListaEquipos() {
+        if (equipoRepository.listarTodos().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay equipos registrados.");
+            return;
+        }
+
+        String[] columnas = { "Nombre", "País", "Motor", "Pilotos Asociados" };
+        DefaultTableModel model = new DefaultTableModel(columnas, 0);
+
+        for (Equipo e : equipoRepository.listarTodos()) {
+            String pilotosStr = "Ninguno";
+            if (e.getPilotos() != null && !e.getPilotos().isEmpty()) {
+                pilotosStr = e.getPilotos().stream().map(Piloto::getNombre).collect(Collectors.joining(", "));
+            }
+            model.addRow(new Object[] { e.getNombre(), e.getPais(), e.getMotor(), pilotosStr });
+        }
+
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        JOptionPane.showMessageDialog(null, scrollPane, "Lista de Equipos", JOptionPane.PLAIN_MESSAGE);
     }
 }

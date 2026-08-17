@@ -8,6 +8,8 @@ public class Circuito {
     private int vueltas;
     private String descripcion;
     private TipoClima climaPromedio;
+    private RecordVuelta recordVuelta;
+    private java.util.List<GanadorHistorico> ganadores;
 
     public Circuito(String id, String nombre, String pais, double longitudKm, int vueltas, String descripcion,
             TipoClima climaPromedio) {
@@ -18,6 +20,7 @@ public class Circuito {
         this.vueltas = vueltas;
         this.descripcion = descripcion;
         this.climaPromedio = climaPromedio;
+        this.ganadores = new java.util.ArrayList<>();
     }
 
     public String getId() {
@@ -74,6 +77,26 @@ public class Circuito {
 
     public void setClimaPromedio(TipoClima climaPromedio) {
         this.climaPromedio = climaPromedio;
+    }
+
+    public RecordVuelta getRecordVuelta() {
+        return recordVuelta;
+    }
+
+    public void setRecordVuelta(RecordVuelta recordVuelta) {
+        this.recordVuelta = recordVuelta;
+    }
+
+    public java.util.List<GanadorHistorico> getGanadores() {
+        return ganadores;
+    }
+
+    public void setGanadores(java.util.List<GanadorHistorico> ganadores) {
+        this.ganadores = ganadores;
+    }
+
+    public void agregarGanador(GanadorHistorico ganador) {
+        this.ganadores.add(ganador);
     }
 
     @Override
