@@ -14,7 +14,8 @@ import java.util.List;
 /**
  * Repositorio de Historial de Configuraciones contra PostgreSQL.
  * Persiste entre ejecuciones, cumpliendo la historia de usuario de
- * "revisar configuraciones previas" (un HashMap no sobrevive al cierre de la app).
+ * "revisar configuraciones previas" (un HashMap no sobrevive al cierre de la
+ * app).
  */
 public class ConfiguracionSqlRepository {
 
@@ -61,6 +62,21 @@ public class ConfiguracionSqlRepository {
         return consultar(sql, pilotoId);
     }
 
+    public List<ConfiguracionVehiculo> obtenerHistorial() {
+        String sql = "SELECT * FROM historial_configuraciones ORDER BY fecha_creacion DESC";
+        List<ConfiguracionVehiculo> resultado = new ArrayList<>();
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(mapearFila(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener el historial completo", e);
+        }
+        return resultado;
+    }
+
     private List<ConfiguracionVehiculo> consultar(String sql, int parametro) {
         List<ConfiguracionVehiculo> resultado = new ArrayList<>();
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
@@ -83,8 +99,7 @@ public class ConfiguracionSqlRepository {
                 ModoConduccion.valueOf(rs.getString("modo_conduccion")),
                 rs.getString("carga_aerodinamica"),
                 rs.getString("presion_neumaticos"),
-                rs.getString("estrategia_combustible")
-        );
+                rs.getString("estrategia_combustible"));
         config.setId(rs.getInt("id"));
         config.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
         return config;

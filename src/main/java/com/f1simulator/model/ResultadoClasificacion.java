@@ -18,9 +18,11 @@ public class ResultadoClasificacion {
     private TipoClima climaSesion;
     private int posicion; // se calcula al ordenar todos los resultados
     private LocalDateTime fecha;
+    private String circuitoNombre;
+    private String vehiculoModelo;
 
     public ResultadoClasificacion(int sesionId, int pilotoId, String pilotoNombre, int circuitoId,
-                                   double tiempoVueltaSegundos, TipoClima climaSesion) {
+            double tiempoVueltaSegundos, TipoClima climaSesion) {
         this.sesionId = sesionId;
         this.pilotoId = pilotoId;
         this.pilotoNombre = pilotoNombre;
@@ -30,21 +32,69 @@ public class ResultadoClasificacion {
         this.fecha = LocalDateTime.now();
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getSesionId() { return sesionId; }
-    public int getPilotoId() { return pilotoId; }
-    public String getPilotoNombre() { return pilotoNombre; }
-    public int getCircuitoId() { return circuitoId; }
-    public double getTiempoVueltaSegundos() { return tiempoVueltaSegundos; }
-    public TipoClima getClimaSesion() { return climaSesion; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public int getPosicion() { return posicion; }
-    public void setPosicion(int posicion) { this.posicion = posicion; }
+    public int getSesionId() {
+        return sesionId;
+    }
 
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+    public int getPilotoId() {
+        return pilotoId;
+    }
+
+    public String getPilotoNombre() {
+        return pilotoNombre;
+    }
+
+    public int getCircuitoId() {
+        return circuitoId;
+    }
+
+    public double getTiempoVueltaSegundos() {
+        return tiempoVueltaSegundos;
+    }
+
+    public TipoClima getClimaSesion() {
+        return climaSesion;
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
+    }
+
+    public String getCircuitoNombre() {
+        return circuitoNombre;
+    }
+
+    public void setCircuitoNombre(String circuitoNombre) {
+        this.circuitoNombre = circuitoNombre;
+    }
+
+    public String getVehiculoModelo() {
+        return vehiculoModelo;
+    }
+
+    public void setVehiculoModelo(String vehiculoModelo) {
+        this.vehiculoModelo = vehiculoModelo;
+    }
 
     @Override
     public String toString() {
