@@ -26,7 +26,7 @@ public class Main {
         VehiculoUI vehiculoUI = new VehiculoUI(vehiculoRepo, equipoRepo, pilotoRepo);
         ConfiguracionUI configUI = new ConfiguracionUI(configRepo, vehiculoRepo, pilotoRepo);
         SimulacionUI simulacionUI = new SimulacionUI(circuitoRepo, pilotoRepo, vehiculoRepo, configRepo, resultadoRepo);
-        //HistorialSimulacionUI historialUI = new HistorialSimulacionUI(resultadoRepo, configRepo, circuitoRepo);
+        ReportesUI historialUI = new ReportesUI(resultadoRepo, configRepo);
 
         String[] opciones = {
                 "Circuitos", "Equipos", "Pilotos", "Vehículos", "Configuración",
@@ -46,7 +46,7 @@ public class Main {
                 case 3 -> vehiculoUI.mostrarMenu();
                 case 4 -> configUI.mostrarMenu();
                 case 5 -> simulacionUI.iniciarSimulacion();
-                //case 6 -> historialUI.mostrarMenu();
+                case 6 -> historialUI.mostrarMenu();
                 default -> { /* Salir */ }
             }
         } while (seleccion != 7 && seleccion != -1);
