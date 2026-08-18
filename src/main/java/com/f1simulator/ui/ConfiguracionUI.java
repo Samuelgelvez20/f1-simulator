@@ -2,8 +2,10 @@ package com.f1simulator.ui;
 
 import com.f1simulator.model.ConfiguracionVehiculo;
 import com.f1simulator.model.ModoConduccion;
+import com.f1simulator.model.Piloto;
 import com.f1simulator.model.Vehiculo;
-import com.f1simulator.repository.ConfiguracionRepository;
+import com.f1simulator.persistence.ConfiguracionSqlRepository;
+import com.f1simulator.repository.PilotoRepository;
 import com.f1simulator.repository.VehiculoRepository;
 
 import javax.swing.JOptionPane;
@@ -13,18 +15,19 @@ import java.util.Optional;
 /**
  * Menú de configuración de vehículo con JOptionPane: aplicar configuración
  * (se guarda automáticamente) y ver historial de configuraciones previas.
- *
- * NOTA (Día 1): el ID de piloto se pide como número libre por ahora, sin
- * validar contra PilotoRepository (aún no existe). Se integra en el Día 2.
+ * Valida que tanto el vehículo como el piloto existan antes de configurar.
  */
 public class ConfiguracionUI {
 
-    private final ConfiguracionRepository configRepo;
+    private final ConfiguracionSqlRepository configRepo;
     private final VehiculoRepository vehiculoRepo;
+    private final PilotoRepository pilotoRepo;
 
-    public ConfiguracionUI(ConfiguracionRepository configRepo, VehiculoRepository vehiculoRepo) {
+    public ConfiguracionUI(ConfiguracionSqlRepository configRepo, VehiculoRepository vehiculoRepo,
+                            PilotoRepository pilotoRepo) {
         this.configRepo = configRepo;
         this.vehiculoRepo = vehiculoRepo;
+        this.pilotoRepo = pilotoRepo;
     }
 
     public void mostrarMenu() {
@@ -57,6 +60,12 @@ public class ConfiguracionUI {
         Integer pilotoId = pedirEntero("ID del piloto que configura el vehículo:");
         if (pilotoId == null) return;
 
+        Optional<Piloto> piloto = pilotoRepo.buscarPorId(pilotoId);
+        if (piloto.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No existe un piloto con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         ModoConduccion modo = pedirOpcion("Modo de conducción:", ModoConduccion.values());
         if (modo == null) return;
 
@@ -70,7 +79,14 @@ public class ConfiguracionUI {
         if (combustible == null) return;
 
         ConfiguracionVehiculo config = new ConfiguracionVehiculo(vehiculoId, pilotoId, modo, aero, presion, combustible);
-        configRepo.guardar(config);
+        try {
+            configRepo.guardar(config);
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudo guardar la configuración en la base de datos:\n" + e.getMessage(),
+                    "Error de persistencia", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         JOptionPane.showMessageDialog(null,
                 "Configuración aplicada y guardada automáticamente en el historial.\n\n" + config,
@@ -81,16 +97,33 @@ public class ConfiguracionUI {
         Integer vehiculoId = pedirEntero("ID del vehículo:");
         if (vehiculoId == null) return;
 
-        List<ConfiguracionVehiculo> historial = configRepo.historialPorVehiculo(vehiculoId);
-        mostrarHistorial(historial, "Historial de configuraciones - Vehículo #" + vehiculoId);
+        try {
+            List<ConfiguracionVehiculo> historial = configRepo.historialPorVehiculo(vehiculoId);
+            mostrarHistorial(historial, "Historial de configuraciones - Vehículo #" + vehiculoId);
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudo consultar la base de datos:\n" + e.getMessage(),
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void verHistorialPorPiloto() {
         Integer pilotoId = pedirEntero("ID del piloto:");
         if (pilotoId == null) return;
 
-        List<ConfiguracionVehiculo> historial = configRepo.historialPorPiloto(pilotoId);
-        mostrarHistorial(historial, "Historial de configuraciones - Piloto #" + pilotoId);
+        if (pilotoRepo.buscarPorId(pilotoId).isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No existe un piloto con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            List<ConfiguracionVehiculo> historial = configRepo.historialPorPiloto(pilotoId);
+            mostrarHistorial(historial, "Historial de configuraciones - Piloto #" + pilotoId);
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudo consultar la base de datos:\n" + e.getMessage(),
+                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void mostrarHistorial(List<ConfiguracionVehiculo> historial, String titulo) {

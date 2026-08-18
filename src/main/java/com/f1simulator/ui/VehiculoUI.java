@@ -2,9 +2,13 @@ package com.f1simulator.ui;
 
 import com.f1simulator.factory.VehiculoFactory;
 import com.f1simulator.model.ModoConduccion;
+import com.f1simulator.model.Piloto;
 import com.f1simulator.model.TipoNeumatico;
 import com.f1simulator.model.Vehiculo;
+import com.f1simulator.repository.EquipoRepository;
+import com.f1simulator.repository.PilotoRepository;
 import com.f1simulator.repository.VehiculoRepository;
+import com.f1simulator.model.Equipo;
 
 import javax.swing.JOptionPane;
 import java.util.List;
@@ -17,17 +21,21 @@ import java.util.Optional;
 public class VehiculoUI {
 
     private final VehiculoRepository vehiculoRepo;
+    private final EquipoRepository equipoRepo;
+    private final PilotoRepository pilotoRepo;
     private final VehiculoFactory factory = new VehiculoFactory();
 
-    public VehiculoUI(VehiculoRepository vehiculoRepo) {
+    public VehiculoUI(VehiculoRepository vehiculoRepo, EquipoRepository equipoRepo, PilotoRepository pilotoRepo) {
         this.vehiculoRepo = vehiculoRepo;
+        this.equipoRepo = equipoRepo;
+        this.pilotoRepo = pilotoRepo;
     }
 
     public void mostrarMenu() {
         String[] opciones = {
                 "Agregar vehículo", "Editar vehículo", "Eliminar vehículo",
                 "Buscar vehículo", "Ver especificaciones", "Comparar vehículos",
-                "Listar todos", "Volver"
+                "Asignar piloto a vehículo", "Listar todos", "Volver"
         };
         int seleccion;
         do {
@@ -42,15 +50,67 @@ public class VehiculoUI {
                 case 3 -> buscarVehiculo();
                 case 4 -> verEspecificaciones();
                 case 5 -> compararVehiculos();
-                case 6 -> listarTodos();
+                case 6 -> asignarPilotoAVehiculo();
+                case 7 -> listarTodos();
                 default -> { /* Volver o cerrar */ }
             }
-        } while (seleccion != 7 && seleccion != -1);
+        } while (seleccion != 8 && seleccion != -1);
+    }
+
+    /**
+     * Historia de usuario "Asignación de pilotos a vehículos": el piloto solo
+     * puede asignarse a un vehículo de su propio equipo. Necesario también
+     * para la simulación (Día 3), que resuelve qué vehículo maneja cada piloto.
+     */
+    private void asignarPilotoAVehiculo() {
+        if (pilotoRepo.listarTodos().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay pilotos registrados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String[] nombresPilotos = pilotoRepo.listarTodos().stream()
+                .map(p -> p.getId() + " - " + p.getNombre() + " (" + (p.getEquipo() != null ? p.getEquipo().getNombre() : "Sin equipo") + ")")
+                .toArray(String[]::new);
+        String seleccionPiloto = (String) JOptionPane.showInputDialog(null, "Selecciona el piloto:",
+                "Piloto", JOptionPane.QUESTION_MESSAGE, null, nombresPilotos, nombresPilotos[0]);
+        if (seleccionPiloto == null) return;
+
+        int pilotoId = Integer.parseInt(seleccionPiloto.split(" - ")[0]);
+        Piloto piloto = pilotoRepo.buscarPorId(pilotoId).orElse(null);
+        if (piloto == null || piloto.getEquipo() == null) {
+            JOptionPane.showMessageDialog(null, "El piloto no tiene un equipo asignado.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<Vehiculo> vehiculosDelEquipo = vehiculoRepo.listarPorEquipo(piloto.getEquipo().getNombre());
+        if (vehiculosDelEquipo.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "El equipo \"" + piloto.getEquipo().getNombre() + "\" no tiene vehículos registrados.",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String[] nombresVehiculos = vehiculosDelEquipo.stream()
+                .map(v -> v.getId() + " - " + v.getModelo())
+                .toArray(String[]::new);
+        String seleccionVehiculo = (String) JOptionPane.showInputDialog(null,
+                "Selecciona el vehículo para " + piloto.getNombre() + ":",
+                "Vehículo", JOptionPane.QUESTION_MESSAGE, null, nombresVehiculos, nombresVehiculos[0]);
+        if (seleccionVehiculo == null) return;
+
+        int vehiculoId = Integer.parseInt(seleccionVehiculo.split(" - ")[0]);
+        Vehiculo vehiculo = vehiculoRepo.buscarPorId(vehiculoId).orElse(null);
+        if (vehiculo == null) return;
+
+        vehiculo.asignarPiloto(pilotoId);
+        JOptionPane.showMessageDialog(null,
+                piloto.getNombre() + " fue asignado al vehículo " + vehiculo.getModelo() + ".",
+                "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void agregarVehiculo() {
         try {
-            String equipoNombre = pedirTexto("Nombre del equipo (debe existir):");
+            String equipoNombre = pedirEquipoExistente();
             if (equipoNombre == null) return;
 
             String modelo = pedirTexto("Modelo del vehículo:");
@@ -217,4 +277,17 @@ public class VehiculoUI {
         if (seleccion == null) return null;
         return TipoNeumatico.valueOf(seleccion);
     }
+
+    private String pedirEquipoExistente() {
+    if (equipoRepo.listarTodos().isEmpty()) {
+        JOptionPane.showMessageDialog(null, "No hay equipos registrados. Regístralo primero en el módulo de Equipos.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+        return null;
+    }
+    String[] nombresEquipos = equipoRepo.listarTodos().stream()
+            .map(Equipo::getNombre)
+            .toArray(String[]::new);
+    return (String) JOptionPane.showInputDialog(null, "Seleccione el equipo:",
+            "Equipo", JOptionPane.QUESTION_MESSAGE, null, nombresEquipos, nombresEquipos[0]);
+}
 }
