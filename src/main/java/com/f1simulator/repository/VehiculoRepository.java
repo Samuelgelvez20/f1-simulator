@@ -72,4 +72,12 @@ public class VehiculoRepository implements Repository<Vehiculo, Integer> {
         }
         return resultado;
     }
+
+    /** Vehículo asignado a un piloto (según Vehiculo.pilotoIds), si existe. Lo usa la simulación (Día 3). */
+    public Optional<Vehiculo> buscarPorPiloto(int pilotoId) {
+        for (Vehiculo v : vehiculos.values()) {
+            if (v.getPilotoIds().contains(pilotoId)) return Optional.of(v);
+        }
+        return Optional.empty();
+    }
 }

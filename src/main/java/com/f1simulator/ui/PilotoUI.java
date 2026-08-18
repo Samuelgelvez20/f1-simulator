@@ -75,7 +75,6 @@ public class PilotoUI {
             if (rol == null)
                 return;
 
-            // Se asocia a un equipo. Para esto listamos los equipos disponibles.
             if (equipoRepository.listarTodos().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "No hay equipos registrados. Registre un equipo primero.",
                         "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -98,6 +97,11 @@ public class PilotoUI {
 
             Piloto nuevoPiloto = new Piloto(id, nombre, equipo, rol);
             pilotoRepository.guardar(nuevoPiloto);
+
+            if (equipo != null) {
+                equipo.agregarPiloto(nuevoPiloto);
+            }
+
             JOptionPane.showMessageDialog(null, "Piloto registrado exitosamente.");
 
         } catch (NumberFormatException e) {
@@ -149,8 +153,15 @@ public class PilotoUI {
                             "Equipo", JOptionPane.QUESTION_MESSAGE, null, nombresEquipos, nombresEquipos[0]);
 
                     if (nombreEquipoSelec != null) {
-                        Equipo equipo = equipoRepository.buscarPorId(nombreEquipoSelec).orElse(null);
-                        piloto.setEquipo(equipo);
+                        Equipo equipoAnterior = piloto.getEquipo();
+                        if (equipoAnterior != null) {
+                            equipoAnterior.removerPiloto(piloto);
+                        }
+                        Equipo equipoNuevo = equipoRepository.buscarPorId(nombreEquipoSelec).orElse(null);
+                        piloto.setEquipo(equipoNuevo);
+                        if (equipoNuevo != null) {
+                            equipoNuevo.agregarPiloto(piloto);
+                        }
                     }
                 }
             }
