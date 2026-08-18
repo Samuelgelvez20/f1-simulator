@@ -25,6 +25,24 @@ public class ResultadoClasificacionSqlRepository {
         this.conexion = ConexionPostgreSQL.getInstancia().getConexion();
     }
 
+    public List<ResultadoClasificacion> obtenerPorCircuito(String nombreCircuito) {
+        // Query to match requested columns (circuito_nombre)
+        String sql = "SELECT * FROM resultados_clasificacion WHERE circuito_nombre = ? ORDER BY tiempo_vuelta_segundos ASC";
+        List<ResultadoClasificacion> resultados = new ArrayList<>();
+
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setString(1, nombreCircuito);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultados.add(mapearFila(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar resultados por nombre de circuito", e);
+        }
+        return resultados;
+    }
+
     public ResultadoClasificacion guardar(ResultadoClasificacion resultado) {
         String sql = "INSERT INTO resultados_clasificacion "
                 + "(sesion_id, piloto_id, piloto_nombre, circuito_id, tiempo_vuelta_segundos, clima_sesion, posicion) "
@@ -92,7 +110,7 @@ public class ResultadoClasificacionSqlRepository {
         List<ResultadoClasificacion> resultados = new ArrayList<>();
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 resultados.add(mapearFila(rs));
             }
@@ -109,11 +127,22 @@ public class ResultadoClasificacionSqlRepository {
                 rs.getString("piloto_nombre"),
                 rs.getInt("circuito_id"),
                 rs.getDouble("tiempo_vuelta_segundos"),
-                TipoClima.valueOf(rs.getString("clima_sesion"))
-        );
+                TipoClima.valueOf(rs.getString("clima_sesion")));
         r.setId(rs.getInt("id"));
         r.setPosicion(rs.getInt("posicion"));
-        r.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
+        if (rs.getTimestamp("fecha") != null) {
+            r.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
+        }
+        // Try injecting circuito_nombre and vehiculo_modelo if they exist in RS,
+        // catching column not found for retrocompatibility
+        try {
+            r.setCircuitoNombre(rs.getString("circuito_nombre"));
+        } catch (SQLException ignored) {
+        }
+        try {
+            r.setVehiculoModelo(rs.getString("vehiculo_modelo"));
+        } catch (SQLException ignored) {
+        }
         return r;
     }
 }
