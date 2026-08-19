@@ -5,6 +5,10 @@ import com.f1simulator.model.TipoClima;
 import com.f1simulator.repository.CircuitoRepository;
 import com.f1simulator.model.GanadorHistorico;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
 import java.util.Optional;
 
 public class CircuitoUI {
@@ -190,31 +194,43 @@ public class CircuitoUI {
             if (query == null || query.trim().isEmpty())
                 return;
 
-            StringBuilder resultados = new StringBuilder();
+            List<Circuito> coincidencias = new java.util.ArrayList<>();
             for (Circuito c : circuitoRepository.listarTodos()) {
                 if (c.getNombre().toLowerCase().contains(query.toLowerCase())
                         || c.getPais().toLowerCase().contains(query.toLowerCase())) {
-                    resultados.append(c.toString()).append("\n");
+                    coincidencias.add(c);
                 }
             }
 
-            if (resultados.length() > 0) {
-                JOptionPane.showMessageDialog(null, resultados.toString());
-            } else {
+            if (coincidencias.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "No se encontraron coincidencias.");
+            } else {
+                mostrarTablaCircuitos(coincidencias);
             }
         }
     }
 
     private void listarCircuitos() {
-        StringBuilder sb = new StringBuilder("Lista de Circuitos:\n\n");
-        for (Circuito c : circuitoRepository.listarTodos()) {
-            sb.append(c.toString()).append("\n");
-        }
         if (circuitoRepository.listarTodos().isEmpty()) {
-            sb.append("No hay circuitos registrados.");
+            JOptionPane.showMessageDialog(null, "No hay circuitos registrados.");
+            return;
         }
-        JOptionPane.showMessageDialog(null, sb.toString());
+        mostrarTablaCircuitos(circuitoRepository.listarTodos());
+    }
+
+    private void mostrarTablaCircuitos(List<Circuito> circuitos) {
+        String[] columnas = { "ID", "Nombre", "País", "Longitud (km)", "Vueltas", "Clima promedio" };
+        DefaultTableModel model = new DefaultTableModel(columnas, 0);
+
+        for (Circuito c : circuitos) {
+            model.addRow(new Object[] { c.getId(), c.getNombre(), c.getPais(), c.getLongitudKm(),
+                    c.getVueltas(), c.getClimaPromedio() });
+        }
+
+        JTable table = new JTable(model);
+        table.setDefaultEditor(Object.class, null);
+        JScrollPane scrollPane = new JScrollPane(table);
+        JOptionPane.showMessageDialog(null, scrollPane, "Lista de Circuitos", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void mostrarDetalleCircuito() {

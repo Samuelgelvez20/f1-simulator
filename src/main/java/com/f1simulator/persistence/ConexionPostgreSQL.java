@@ -20,9 +20,8 @@ public class ConexionPostgreSQL {
     private static ConexionPostgreSQL instancia;
     private Connection conexion;
 
-    private static final String HOST = "localhost";
-
     private ConexionPostgreSQL() {
+        String host = obtenerVariable("POSTGRES_HOST", "localhost");
         String db = obtenerVariable("POSTGRES_DB", "f1simulator");
         String usuario = obtenerVariable("POSTGRES_USER", "f1user");
         String password = obtenerVariable("POSTGRES_PASSWORD", null);
@@ -35,7 +34,7 @@ public class ConexionPostgreSQL {
                 + "(ej: 'export $(cat .env | xargs)' en Linux/Mac).");
         }
 
-        String url = String.format("jdbc:postgresql://%s:%s/%s", HOST, puerto, db);
+        String url = String.format("jdbc:postgresql://%s:%s/%s", host, puerto, db);
 
         try {
             Class.forName("org.postgresql.Driver");

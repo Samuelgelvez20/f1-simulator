@@ -1,5 +1,6 @@
 package com.f1simulator;
 
+import com.f1simulator.persistence.BaseDatosInitializer;
 import com.f1simulator.persistence.ConfiguracionSqlRepository;
 import com.f1simulator.persistence.ResultadoClasificacionSqlRepository;
 import com.f1simulator.repository.*;
@@ -13,6 +14,10 @@ import javax.swing.JOptionPane;
  */
 public class Main {
     public static void main(String[] args) {
+        // Fase 2: esquema y datos iniciales idempotentes (no requiere psql manual).
+        BaseDatosInitializer.ejecutar();
+
+
         CircuitoRepository circuitoRepo = new CircuitoRepository();
         PilotoRepository pilotoRepo = new PilotoRepository();
         EquipoRepository equipoRepo = new EquipoRepository();
@@ -30,7 +35,7 @@ public class Main {
 
         String[] opciones = {
                 "Circuitos", "Equipos", "Pilotos", "Vehículos", "Configuración",
-                "Simular Clasificación", "Historial y Comparación", "Salir"
+                "Simulación", "Historial y Comparación", "Salir"
         };
         int seleccion;
         do {

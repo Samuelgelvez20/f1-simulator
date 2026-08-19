@@ -11,6 +11,9 @@ import com.f1simulator.repository.VehiculoRepository;
 import com.f1simulator.model.Equipo;
 
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,6 +106,7 @@ public class VehiculoUI {
         if (vehiculo == null) return;
 
         vehiculo.asignarPiloto(pilotoId);
+        vehiculoRepo.actualizar(vehiculo.getId(), vehiculo);
         JOptionPane.showMessageDialog(null,
                 piloto.getNombre() + " fue asignado al vehículo " + vehiculo.getModelo() + ".",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -239,9 +243,26 @@ public class VehiculoUI {
             JOptionPane.showMessageDialog(null, "No hay vehículos para mostrar.", titulo, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        lista.forEach(v -> sb.append(v).append("\n"));
-        JOptionPane.showMessageDialog(null, sb.toString(), titulo, JOptionPane.PLAIN_MESSAGE);
+
+        String[] columnas = { "ID", "Modelo", "Motor", "Equipo", "Vel. máx (km/h)", "Acel. 0-100 (s)", "Pilotos" };
+        DefaultTableModel model = new DefaultTableModel(columnas, 0);
+
+        for (Vehiculo v : lista) {
+            String pilotos = "Ninguno";
+            if (v.getPilotoIds() != null && !v.getPilotoIds().isEmpty()) {
+                pilotos = v.getPilotoIds().stream()
+                        .map(id -> pilotoRepo.buscarPorId(id).map(Piloto::getNombre).orElse("ID " + id))
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("Ninguno");
+            }
+            model.addRow(new Object[] { v.getId(), v.getModelo(), v.getMotor(), v.getEquipoNombre(),
+                    v.getVelocidadMaximaKmh(), v.getAceleracion0100(), pilotos });
+        }
+
+        JTable table = new JTable(model);
+        table.setDefaultEditor(Object.class, null);
+        JScrollPane scrollPane = new JScrollPane(table);
+        JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.PLAIN_MESSAGE);
     }
 
     // ---- Helpers de entrada ----

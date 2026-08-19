@@ -2,8 +2,10 @@ package com.f1simulator.ui;
 
 import com.f1simulator.model.Circuito;
 import com.f1simulator.model.ConfiguracionVehiculo;
+import com.f1simulator.model.GanadorHistorico;
 import com.f1simulator.model.ModoConduccion;
 import com.f1simulator.model.Piloto;
+import com.f1simulator.model.RecordVuelta;
 import com.f1simulator.model.ResultadoClasificacion;
 import com.f1simulator.model.TipoClima;
 import com.f1simulator.model.Vehiculo;
@@ -19,12 +21,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Menú de Simulación de Clasificación (Día 3): selección de circuito, clima
- * aleatorio, cálculo concurrente de tiempos de vuelta (un hilo por piloto) y
+ * aleatorio, cálculo concurrente de tiempos de vuelta (un hilo por piloto),
+ * actualización del récord de vuelta del circuito si corresponde, y
  * visualización de la clasificación final con JTable + JScrollPane.
  */
 public class SimulacionUI {
@@ -72,7 +76,11 @@ public class SimulacionUI {
 
         try {
             List<ResultadoClasificacion> resultados = simulacionService.ejecutarSimulacion(circuito, clima, participantes);
-            mostrarClasificacion(resultados, circuito, clima);
+
+            registrarGanadorSiCorresponde(circuito, resultados);
+            boolean nuevoRecord = actualizarRecordVueltaSiCorresponde(circuito, resultados);
+
+            mostrarClasificacion(resultados, circuito, clima, nuevoRecord);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             JOptionPane.showMessageDialog(null, "La simulación fue interrumpida.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -119,7 +127,73 @@ public class SimulacionUI {
         return ModoConduccion.NORMAL;
     }
 
-    private void mostrarClasificacion(List<ResultadoClasificacion> resultados, Circuito circuito, TipoClima clima) {
+    /**
+     * Registra al ganador de la sesión (posición 1) en el historial de
+     * ganadores del circuito. Se persiste en la tabla ganadores_historicos
+     * como un apéndice: el historial conserva todos los ganadores, no solo
+     * el último. La "temporada" se identifica con el sesion_id de la sesión.
+     */
+    private void registrarGanadorSiCorresponde(Circuito circuito, List<ResultadoClasificacion> resultados) {
+        resultados.stream()
+                .filter(r -> r.getPosicion() == 1)
+                .findFirst()
+                .ifPresent(ganador -> circuitoRepo.registrarGanador(circuito.getId(),
+                        new GanadorHistorico(String.valueOf(ganador.getSesionId()),
+                                ganador.getPilotoNombre())));
+    }
+
+    /**
+     * Compara el tiempo del ganador de la sesión contra el récord de vuelta
+     * actual del circuito. Si es más rápido (o si el circuito no tenía
+     * récord todavía), lo actualiza y lo persiste. Devuelve true si hubo
+     * un nuevo récord, para poder avisarlo en pantalla.
+     */
+    private boolean actualizarRecordVueltaSiCorresponde(Circuito circuito, List<ResultadoClasificacion> resultados) {
+        ResultadoClasificacion ganador = resultados.stream()
+                .filter(r -> r.getPosicion() == 1)
+                .findFirst()
+                .orElse(null);
+        if (ganador == null) return false;
+
+        double tiempoNuevo = ganador.getTiempoVueltaSegundos();
+        RecordVuelta recordActual = circuito.getRecordVuelta();
+
+        boolean esNuevoRecord = (recordActual == null) || (tiempoNuevo < parsearTiempo(recordActual.getTiempoStr()));
+
+        if (esNuevoRecord) {
+            RecordVuelta nuevoRecord = new RecordVuelta(
+                    formatearTiempo(tiempoNuevo), ganador.getPilotoNombre(), Year.now().getValue());
+            circuito.setRecordVuelta(nuevoRecord);
+            circuitoRepo.actualizar(circuito.getId(), circuito);
+        }
+        return esNuevoRecord;
+    }
+
+    /** Convierte "M:SS.mmm" a segundos totales, para poder comparar tiempos. */
+    private double parsearTiempo(String tiempoStr) {
+        try {
+            String[] partes = tiempoStr.split(":");
+            double minutos = Double.parseDouble(partes[0]);
+            // El tiempo guardado puede usar coma decimal si el locale del sistema
+            // es español ("1:07,769"): se normaliza a punto antes de convertir.
+            double segundos = Double.parseDouble(partes[1].replace(',', '.'));
+            return minutos * 60 + segundos;
+        } catch (Exception e) {
+            // Si el formato guardado no es el esperado, se trata como "sin récord válido"
+            // para no bloquear la actualización con un nuevo récord bien formado.
+            return Double.MAX_VALUE;
+        }
+    }
+
+    /** Convierte segundos totales al formato "M:SS.mmm" usado por RecordVuelta. */
+    private String formatearTiempo(double segundosTotales) {
+        int minutos = (int) (segundosTotales / 60);
+        double segundosRestantes = segundosTotales - (minutos * 60);
+        return String.format("%d:%06.3f", minutos, segundosRestantes);
+    }
+
+    private void mostrarClasificacion(List<ResultadoClasificacion> resultados, Circuito circuito,
+                                       TipoClima clima, boolean nuevoRecord) {
         String[] columnas = {"Pos.", "Piloto", "Tiempo (s)", "Clima"};
         DefaultTableModel model = new DefaultTableModel(columnas, 0);
         for (ResultadoClasificacion r : resultados) {
@@ -128,7 +202,12 @@ public class SimulacionUI {
         }
         JTable table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
-        JOptionPane.showMessageDialog(null, scrollPane,
-                "Clasificación - " + circuito.getNombre() + " (" + clima + ")", JOptionPane.PLAIN_MESSAGE);
+
+        String titulo = "Clasificación - " + circuito.getNombre() + " (" + clima + ")";
+        if (nuevoRecord) {
+            titulo += " — ¡NUEVO RÉCORD DE VUELTA!";
+        }
+
+        JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.PLAIN_MESSAGE);
     }
 }

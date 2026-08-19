@@ -11,6 +11,10 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - f1-postgres-data:/var/lib/postgresql/data
+      # Esquema y datos iniciales: se aplican SOLO al crear el volumen
+      # (docker-entrypoint-initdb.d corre una única vez en BD vacía).
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+      - ./src/main/resources/seed.sql:/docker-entrypoint-initdb.d/20-seed.sql:ro
 
 volumes:
   f1-postgres-data:

@@ -14,8 +14,12 @@ import java.util.List;
 /**
  * Repositorio de Resultados de Clasificación contra PostgreSQL, usando
  * PreparedStatement (mismo patrón JDBC visto en clase con MySQL).
- * A diferencia de los repos en memoria, este SÍ persiste entre ejecuciones
- * de la aplicación, tal como lo exige la historia de usuario correspondiente.
+ *
+ * Fase 2: se corrige la consulta por circuito (antes buscaba una columna
+ * circuito_nombre inexistente, lo que hacía fallar el reporte "Comparación
+ * de Tiempos"), y ahora todas las consultas traen el nombre del circuito y
+ * el modelo del vehículo mediante JOIN/subconsulta, alimentando las columnas
+ * "Circuito" y "Vehículo" de la UI de reportes.
  */
 public class ResultadoClasificacionSqlRepository {
 
@@ -25,9 +29,14 @@ public class ResultadoClasificacionSqlRepository {
         this.conexion = ConexionPostgreSQL.getInstancia().getConexion();
     }
 
+    /**
+     * Resultados de un circuito buscado por NOMBRE (lo que pide la UI de
+     * reportes). Se resuelve con JOIN a la tabla circuitos.
+     */
     public List<ResultadoClasificacion> obtenerPorCircuito(String nombreCircuito) {
-        // Query to match requested columns (circuito_nombre)
-        String sql = "SELECT * FROM resultados_clasificacion WHERE circuito_nombre = ? ORDER BY tiempo_vuelta_segundos ASC";
+        String sql = "SELECT " + COLUMNAS + " FROM resultados_clasificacion r "
+                + "JOIN circuitos c ON c.id = r.circuito_id "
+                + "WHERE LOWER(c.nombre) = LOWER(?) ORDER BY r.tiempo_vuelta_segundos ASC";
         List<ResultadoClasificacion> resultados = new ArrayList<>();
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
@@ -72,7 +81,9 @@ public class ResultadoClasificacionSqlRepository {
     }
 
     public List<ResultadoClasificacion> listarPorCircuito(int circuitoId) {
-        String sql = "SELECT * FROM resultados_clasificacion WHERE circuito_id = ? ORDER BY tiempo_vuelta_segundos ASC";
+        String sql = "SELECT " + COLUMNAS + " FROM resultados_clasificacion r "
+                + "JOIN circuitos c ON c.id = r.circuito_id "
+                + "WHERE r.circuito_id = ? ORDER BY r.tiempo_vuelta_segundos ASC";
         List<ResultadoClasificacion> resultados = new ArrayList<>();
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
@@ -89,7 +100,9 @@ public class ResultadoClasificacionSqlRepository {
     }
 
     public List<ResultadoClasificacion> listarPorPiloto(int pilotoId) {
-        String sql = "SELECT * FROM resultados_clasificacion WHERE piloto_id = ? ORDER BY fecha DESC";
+        String sql = "SELECT " + COLUMNAS + " FROM resultados_clasificacion r "
+                + "JOIN circuitos c ON c.id = r.circuito_id "
+                + "WHERE r.piloto_id = ? ORDER BY r.fecha DESC";
         List<ResultadoClasificacion> resultados = new ArrayList<>();
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
@@ -106,7 +119,9 @@ public class ResultadoClasificacionSqlRepository {
     }
 
     public List<ResultadoClasificacion> listarTodos() {
-        String sql = "SELECT * FROM resultados_clasificacion ORDER BY fecha DESC";
+        String sql = "SELECT " + COLUMNAS + " FROM resultados_clasificacion r "
+                + "JOIN circuitos c ON c.id = r.circuito_id "
+                + "ORDER BY r.fecha DESC";
         List<ResultadoClasificacion> resultados = new ArrayList<>();
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql);
@@ -119,6 +134,17 @@ public class ResultadoClasificacionSqlRepository {
         }
         return resultados;
     }
+
+    /**
+     * Columnas comunes: r.* más el nombre del circuito (JOIN) y el modelo del
+     * vehículo asignado al piloto (subconsulta, para no duplicar filas si un
+     * piloto tuviera más de un vehículo).
+     */
+    private static final String COLUMNAS = "r.id, r.sesion_id, r.piloto_id, r.piloto_nombre, "
+            + "r.circuito_id, r.tiempo_vuelta_segundos, r.clima_sesion, r.posicion, r.fecha, "
+            + "c.nombre AS circuito_nombre, "
+            + "(SELECT v.modelo FROM vehiculo_piloto vp JOIN vehiculos v ON v.id = vp.vehiculo_id "
+            + " WHERE vp.piloto_id = r.piloto_id LIMIT 1) AS vehiculo_modelo";
 
     private ResultadoClasificacion mapearFila(ResultSet rs) throws SQLException {
         ResultadoClasificacion r = new ResultadoClasificacion(
@@ -133,16 +159,8 @@ public class ResultadoClasificacionSqlRepository {
         if (rs.getTimestamp("fecha") != null) {
             r.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
         }
-        // Try injecting circuito_nombre and vehiculo_modelo if they exist in RS,
-        // catching column not found for retrocompatibility
-        try {
-            r.setCircuitoNombre(rs.getString("circuito_nombre"));
-        } catch (SQLException ignored) {
-        }
-        try {
-            r.setVehiculoModelo(rs.getString("vehiculo_modelo"));
-        } catch (SQLException ignored) {
-        }
+        r.setCircuitoNombre(rs.getString("circuito_nombre"));
+        r.setVehiculoModelo(rs.getString("vehiculo_modelo"));
         return r;
     }
 }
