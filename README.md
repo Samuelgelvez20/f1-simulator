@@ -1,5 +1,15 @@
 # F1 Simulator 🏎️
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Completado-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Version-v1.0.0-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Concurrency-Multithreading-orange?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />
+</p>
+
+
 Simulador de clasificación de Fórmula 1 desarrollado en Java, con concurrencia real (un hilo por piloto), interfaz gráfica `JOptionPane` y persistencia parcial en PostgreSQL.
 
 Desarrollado por — **Samuel David Gelvez Rodriguez** y **Maria Fernanda Quiñonez**.
@@ -114,3 +124,14 @@ Convención de **[Conventional Commits](https://www.conventionalcommits.org/)**:
 
 - Samuel David Gelvez Rodriguez
 - Maria Fernanda Quiñonez
+
+## 👥 Trabajo Colaborativo y Git Flow
+
+- **Equipo:** Samuel David Gelvez Rodriguez & Maria Fernanda Quiñonez.
+- **Flujo de Trabajo:** Git Flow con rama  para releases estables,  para integración y ramas ,  para desarrollo en paralelo de módulos independientes.
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia **MIT** — consulta el archivo [LICENSE](LICENSE) para más detalles.
