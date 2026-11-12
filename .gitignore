@@ -4,4 +4,4 @@ target/
 *.iml
 .vscode/
 *.log
-.env
+.envdependency-reduced-pom.xml

@@ -2,133 +2,100 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Completado-success?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Version-v1.0.0-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/Version-v2.0.0-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaFX-21-007396?style=for-the-badge&logo=openjdk&logoColor=white" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
   <img src="https://img.shields.io/badge/Concurrency-Multithreading-orange?style=for-the-badge" />
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />
 </p>
 
-
-Simulador de clasificación de Fórmula 1 desarrollado en Java, con concurrencia real (un hilo por piloto), interfaz gráfica `JOptionPane` y persistencia parcial en PostgreSQL.
+Simulador de clasificación y telemetría de Fórmula 1 desarrollado en **Java 21**, con motor de **concurrencia multihilo** (`ExecutorService` y `Callable` en paralelo, 1 hilo por monoplaza), interfaz gráfica reactiva y deportiva construida con **JavaFX 21** (estética Carbon Black & F1 Racing Red), y persistencia de resultados y setups en **PostgreSQL**.
 
 Desarrollado por — **Samuel David Gelvez Rodriguez** y **Maria Fernanda Quiñonez**.
 
-## 📌 Descripción
+---
 
-El sistema permite gestionar circuitos, pilotos, equipos y vehículos de F1, configurar cada vehículo (modo de conducción, carga aerodinámica, presión de neumáticos, estrategia de combustible), y simular una sesión de clasificación completa: todos los pilotos registrados corren su vuelta rápida **en paralelo**, bajo un clima aleatorio generado para la sesión, con penalización si el neumático montado no es adecuado para ese clima. Los resultados se ordenan, se muestran en una tabla, y quedan guardados para poder compararlos después.
+## 📌 Descripción del Proyecto
 
-## ✨ Funcionalidades
+El sistema permite gestionar escuderías, pilotos, bólidos y circuitos oficiales del Campeonato Mundial de Fórmula 1, configurar setups de telemetría (modo de conducción, downforce aerodinámico, presión de neumáticos y estrategia de combustible) y simular sesiones de clasificación en tiempo real:
 
-- **CRUD de Circuitos, Pilotos, Equipos y Vehículos**, con búsquedas y detalle de cada entidad.
-- **Fábrica de vehículos** (`VehiculoFactory`) que calcula el rendimiento por modo de conducción según el equipo/motor.
-- **Asignación de pilotos a vehículos** por equipo.
-- **Comparación de vehículos** (velocidad, consumo, desgaste).
-- **Configuración de vehículo**: modo de conducción, carga aerodinámica, presión de neumáticos, estrategia de combustible.
-- **Simulación de clasificación**: clima aleatorio por sesión, cálculo concurrente del tiempo de vuelta de cada piloto, penalización del 10% por neumático inadecuado, clasificación final ordenada y mostrada en `JTable`.
-- **Historial y comparación**: resultados de clasificación por circuito, e historial de configuraciones guardadas — ambos consultados desde PostgreSQL.
+1. **Simulación Concurrente:** Todos los bólidos corren su vuelta de clasificación simultáneamente en paralelo a través de un pool de subprocesos.
+2. **Dinámica de Clima y Neumáticos:** Variación meteorológica (`SECO`, `LLUVIOSO`, `EXTREMO`), aplicando un **10% de penalización por vuelta** si el monoplaza monta compuestos inadecuados para el asfalto.
+3. **Persistencia en PostgreSQL:** Almacenamiento seguro de historiales de clasificación y configuraciones de telemetría por piloto y sesión.
+4. **Dashboard Deportivo Moderno:** Interfaz JavaFX 21 con tabla de tiempos estilo Formula 1 (Pole Position purple timing, sector gaps, delta times y telemetría).
 
-## 🌦️ Regla de clima y neumáticos
+---
 
-Si el vehículo no tiene montado un neumático adecuado para el clima de la sesión (`LLUVIOSO` o `EXTREMO` sin llantas de lluvia), su tiempo de vuelta recibe una **penalización del 10%**.
+## ✨ Funcionalidades Principales
 
-## 🛠️ Tecnologías
+- **Simulación Multihilo de Clasificación:** Cada piloto es ejecutado en su propio hilo concurrente (`TareaPiloto`), sincronizando tiempos sin bloqueos de interfaz mediante `CompletableFuture` y `Platform.runLater`.
+- **Fábrica de Vehículos (`VehiculoFactory`):** Cálculo automatizado de velocidad punta, aceleración y curvas de rendimiento por modo de pilotaje.
+- **Telemetría & Setup:** Ajuste de alerones, presión de neumáticos y estrategias de motor guardadas directamente en PostgreSQL.
+- **Seeder Oficial de F1:** Precarga inicial de circuitos legendarios (Monaco, Silverstone, Spa-Francorchamps, Monza) y escuderías oficiales (Red Bull, Ferrari, Mercedes, McLaren).
+- **Historial Completo en Base de Datos:** Consulta de tiempos históricos, pole positions y comparativas entre pilotos.
 
-- **Java 17**, gestionado con **Maven**
-- **Swing / JOptionPane** (interfaz gráfica) + `JTable`/`JScrollPane` para tablas
-- **PostgreSQL** (vía **JDBC**, `PreparedStatement`) para persistencia
-- **Docker Compose** para levantar PostgreSQL localmente
-- `java.util.concurrent`: `ExecutorService`, `Runnable`, `synchronized`, `invokeAll`
+---
 
-## 🏗️ Arquitectura
+## 🛠️ Stack Tecnológico
+
+- **Lenguaje:** Java 21 (LTS)
+- **Interfaz Gráfica:** JavaFX 21 (`javafx-controls`, `javafx-fxml`, `javafx-graphics`)
+- **Gestor de Construcción:** Apache Maven con `maven-shade-plugin` para empaquetado Fat JAR
+- **Concurrencia:** `java.util.concurrent` (`ExecutorService`, `Callable`, `synchronized`, `invokeAll`)
+- **Base de Datos:** PostgreSQL 16 (vía JDBC con `PreparedStatement`)
+
+---
+
+## 🏗️ Arquitectura de Software
 
 ```
 com.f1simulator
- ├── model         → Piloto, Equipo, Vehiculo, Circuito, ConfiguracionVehiculo, ResultadoClasificacion...
- ├── factory        → VehiculoFactory (patrón Factory)
- ├── repository     → Repositorios en memoria (HashMap): Circuito, Piloto, Equipo, Vehiculo
- ├── persistence     → ConexionPostgreSQL (patrón Singleton) + repos SQL de Resultados y Configuraciones
- ├── service         → SimulacionService, ImpactoCircuitoService, ParticipanteSimulacion
- ├── concurrency     → TareaPiloto (Runnable, una instancia por piloto en la simulación)
- ├── ui              → Menús JOptionPane por módulo (Circuitos, Pilotos, Equipos, Vehículos, Configuración, Simulación, Reportes)
- └── Main.java       → Punto de entrada, conecta todos los módulos
+ ├── concurrency     → TareaPiloto (Runnable/Callable, simulación en paralelo por piloto)
+ ├── factory         → VehiculoFactory (cálculo de rendimiento dinámico)
+ ├── model           → Circuito, Piloto, Equipo, Vehiculo, ConfiguracionVehiculo, ResultadoClasificacion...
+ ├── persistence     → ConexionPostgreSQL (Singleton) + Repositorios SQL
+ ├── repository      → Repositorios en memoria para entidades base
+ ├── service         → SimulacionService, F1DataSeeder, ParticipanteSimulacion
+ ├── ui.javafx       → F1App, F1DashboardView (interfaz gráfica completa en JavaFX)
+ └── F1Launcher.java → Bootstrap universal compatible con módulos JavaFX
 ```
 
-### Concurrencia en la simulación
+---
 
-Cada piloto se simula en su propio hilo (`TareaPiloto implements Runnable`), coordinados por un `ExecutorService` (`Executors.newFixedThreadPool`). La lista de resultados es compartida entre todos los hilos, así que el acceso a ella está protegido con `synchronized` para evitar condiciones de carrera al escribir al mismo tiempo. `invokeAll()` bloquea la ejecución hasta que **todos** los pilotos terminaron de calcular su tiempo, y solo entonces se ordena la clasificación final.
+## 🚀 Cómo Ejecutar el Proyecto
 
-## 💾 Persistencia: qué quedó en PostgreSQL y qué en memoria
+### Requisitos Previos
+- Java 21 o superior
+- Maven 3.8+
+- Servidor PostgreSQL activo
 
-**Decisión original** (y la que sigue vigente en el proyecto final): el enunciado pide explícitamente `HashMap`/`Map` como almacenamiento de Circuitos, Pilotos, Equipos y Vehículos, y pide base de datos real solo para los resultados de clasificación y el historial de configuraciones — por eso la arquitectura se dividió así desde el Día 1.
-
-| Entidad | Almacenamiento |
-|---|---|
-| Circuitos, Pilotos, Equipos, Vehículos | `HashMap` en memoria (se pierden al cerrar la app) |
-| `resultados_clasificacion` | **PostgreSQL** |
-| `historial_configuraciones` | **PostgreSQL** |
-
-**Intento de migración completa**: se abrió la rama `feature/migracion-postgresql-completa` con la intención de mover también Circuitos/Pilotos/Equipos/Vehículos a PostgreSQL, pero **no se alcanzó a completar por falta de tiempo** dentro del plazo de 3 días — la rama quedó sin avance funcional y no se mergeó. El sistema entrega exactamente lo que pedía el enunciado (persistencia real donde era obligatoria), con esa migración adicional como trabajo futuro pendiente.
-
-### Limitaciones conocidas
-
-- Circuitos, Pilotos, Equipos y Vehículos **no persisten** entre ejecuciones — cada vez que se cierra el programa, hay que volver a registrarlos.
-- No hay una validación mínima de "equipos completos" (por ejemplo, al menos 2 equipos con 2 pilotos cada uno) antes de lanzar la simulación completa; si faltan pilotos con vehículo asignado, simplemente se excluyen de la clasificación con un aviso.
-
-## 🔀 Flujo de Git usado
-
-GitFlow liviano con 2 personas: una rama larga por persona/frente de trabajo (`feature/samuel-vehiculos-simulacion`, `feature/mafe-circuitos-pilotos-equipos`, `feature/persistencia-postgresql`), mergeando frecuentemente a `develop` en vez de acumular al final. `main` solo recibe merges desde `develop` al cerrar el proyecto. Commits siguiendo **Conventional Commits** (`feat:`, `fix:`, `chore:`) en todo el historial.
-
-## 🚀 Cómo ejecutar el proyecto
-
-### Requisitos
-- JDK 17+
-- Maven
-- Docker (para levantar PostgreSQL) — o una instancia propia de PostgreSQL
-
-### 1. Levantar PostgreSQL
-
+### 1. Base de Datos PostgreSQL
+Crea la base de datos `f1simulator` y ejecuta el script de inicialización:
 ```bash
-cp .env.example .env
-# edita .env si quieres cambiar usuario/clave/puerto
-docker compose up -d
+psql -U postgres -d f1simulator -f src/main/resources/schema.sql
 ```
 
-### 2. Ejecutar el esquema SQL
-
-Ejecuta el script `src/main/resources/schema.sql` contra la base de datos levantada (crea las tablas `resultados_clasificacion` e `historial_configuraciones`).
-
-### 3. Compilar y correr
-
+### 2. Compilación y Empaquetado
 ```bash
-mvn compile
-mvn exec:java
+mvn clean package -DskipTests
 ```
 
-## 🖥️ Módulos del menú principal
+### 3. Ejecución de la Aplicación
+```bash
+java -jar target/f1-simulator.jar
+```
+*O ejecutando directamente con el plugin de JavaFX:*
+```bash
+mvn javafx:run
+```
 
-1. Circuitos
-2. Equipos
-3. Pilotos
-4. Vehículos
-5. Configuración
-6. Simular Clasificación
-7. Historial y Comparación
-8. Salir
+---
 
-## 📦 Control de versiones
+## 👥 Autores y Flujo de Trabajo
 
-Convención de **[Conventional Commits](https://www.conventionalcommits.org/)**: `feat:` nueva funcionalidad, `fix:` corrección de errores, `chore:` tareas de configuración/mantenimiento.
-
-## 👥 Autores
-
-- Samuel David Gelvez Rodriguez
-- Maria Fernanda Quiñonez
-
-## 👥 Trabajo Colaborativo y Git Flow
-
-- **Equipo:** Samuel David Gelvez Rodriguez & Maria Fernanda Quiñonez.
-- **Flujo de Trabajo:** Git Flow con rama  para releases estables,  para integración y ramas ,  para desarrollo en paralelo de módulos independientes.
+- **Samuel David Gelvez Rodriguez** & **Maria Fernanda Quiñonez**.
+- **Flujo de Trabajo:** Git Flow con commits bajo la especificación [Conventional Commits](https://www.conventionalcommits.org/).
 
 ---
 

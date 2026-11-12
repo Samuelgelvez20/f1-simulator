@@ -25,15 +25,8 @@ public class ConexionPostgreSQL {
     private ConexionPostgreSQL() {
         String db = obtenerVariable("POSTGRES_DB", "f1simulator");
         String usuario = obtenerVariable("POSTGRES_USER", "f1user");
-        String password = obtenerVariable("POSTGRES_PASSWORD", null);
+        String password = obtenerVariable("POSTGRES_PASSWORD", "f1097500730");
         String puerto = obtenerVariable("POSTGRES_PORT", "5432");
-
-        if (password == null) {
-            throw new IllegalStateException(
-                "No se encontró la variable de entorno POSTGRES_PASSWORD. "
-                + "Exporta las variables de tu .env antes de ejecutar la app "
-                + "(ej: 'export $(cat .env | xargs)' en Linux/Mac).");
-        }
 
         String url = String.format("jdbc:postgresql://%s:%s/%s", HOST, puerto, db);
 

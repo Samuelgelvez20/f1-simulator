@@ -1,0 +1,261 @@
+/* ==========================================================================
+   F1 SIMULATOR - OFFICIAL FORMULA 1 MOTORSPORT JAVAFX THEME
+   Palette: Carbon Black, F1 Racing Red (#e10600), Telemetry Purple & Gold
+   ========================================================================== */
+
+.root {
+    -fx-font-family: 'Segoe UI', 'Helvetica Neue', 'DejaVu Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-base: #0a0d14;
+    -fx-background: #080a0f;
+    -fx-text-fill: #f8fafc;
+    -fx-accent: #e10600;
+    -fx-focus-color: #e10600;
+    -fx-faint-focus-color: rgba(225, 6, 0, 0.25);
+}
+
+.app-container {
+    -fx-background-color: #080a0f;
+}
+
+/* Sidebar & Header */
+.sidebar {
+    -fx-background-color: #0d111a;
+    -fx-border-color: #1e2536;
+    -fx-border-width: 0 1 0 0;
+}
+
+.top-bar {
+    -fx-background-color: #0f1422;
+    -fx-border-color: #1e2536;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 14 24;
+}
+
+.card {
+    -fx-background-color: #131826;
+    -fx-background-radius: 12px;
+    -fx-border-color: #1e273d;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 10, 0, 0, 4);
+}
+
+.card-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+    -fx-letter-spacing: 0.5px;
+}
+
+.card-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+/* Navigation buttons */
+.nav-section-title {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #64748b;
+    -fx-padding: 14 16 4 16;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-alignment: BASELINE_LEFT;
+    -fx-padding: 10 16;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #1a2235;
+    -fx-text-fill: #ffffff;
+}
+
+.nav-button-active {
+    -fx-background-color: linear-gradient(to right, #b30500, #e10600);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(225, 6, 0, 0.45), 8, 0, 0, 2);
+}
+
+/* Buttons */
+.button {
+    -fx-background-radius: 8px;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+
+.btn-racing-red {
+    -fx-background-color: linear-gradient(to bottom, #e10600, #b30500);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #ff3833;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(225, 6, 0, 0.4), 8, 0, 0, 2);
+}
+
+.btn-racing-red:hover {
+    -fx-background-color: linear-gradient(to bottom, #ff1801, #e10600);
+}
+
+.btn-telemetry {
+    -fx-background-color: linear-gradient(to bottom, #00d2be, #00a394);
+    -fx-text-fill: #000000;
+    -fx-border-color: #33e4d4;
+    -fx-border-radius: 8px;
+    -fx-font-weight: 800;
+}
+
+.btn-telemetry:hover {
+    -fx-background-color: linear-gradient(to bottom, #33e4d4, #00d2be);
+}
+
+.btn-secondary {
+    -fx-background-color: #1c2438;
+    -fx-text-fill: #cbd5e1;
+    -fx-border-color: #2c3854;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #2c3854;
+    -fx-text-fill: #ffffff;
+}
+
+/* Form inputs */
+.text-field, .combo-box, .spinner {
+    -fx-background-color: #0b0e17;
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #64748b;
+    -fx-background-radius: 8px;
+    -fx-border-color: #2c3854;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused, .combo-box:focused, .spinner:focused {
+    -fx-border-color: #e10600;
+    -fx-background-color: #101524;
+    -fx-effect: dropshadow(gaussian, rgba(225, 6, 0, 0.35), 6, 0, 0, 0);
+}
+
+/* Tables */
+.table-view {
+    -fx-background-color: #101524;
+    -fx-background-radius: 10px;
+    -fx-border-color: #1e273d;
+    -fx-border-radius: 10px;
+    -fx-table-cell-border-color: #1e273d;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #192033;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent #2c3854 transparent transparent;
+    -fx-padding: 10 8;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+}
+
+.table-row-cell {
+    -fx-background-color: #101524;
+    -fx-border-color: transparent transparent #1e273d transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #0d111d;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #1c243a;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(225, 6, 0, 0.25);
+    -fx-table-cell-border-color: #e10600;
+}
+
+.table-cell {
+    -fx-text-fill: #f1f5f9;
+    -fx-padding: 9 12;
+}
+
+/* Motorsport Badges */
+.badge {
+    -fx-background-radius: 9999px;
+    -fx-padding: 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.badge-f1 {
+    -fx-background-color: #e10600;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 4px;
+    -fx-padding: 2 6;
+    -fx-font-weight: 900;
+}
+
+.badge-p1 {
+    -fx-background-color: rgba(245, 158, 11, 0.2);
+    -fx-text-fill: #fbbf24;
+    -fx-border-color: #f59e0b;
+    -fx-border-radius: 9999px;
+}
+
+.badge-purple {
+    -fx-background-color: rgba(168, 85, 247, 0.2);
+    -fx-text-fill: #c084fc;
+    -fx-border-color: #a855f7;
+    -fx-border-radius: 9999px;
+}
+
+.badge-penalty {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #f87171;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 9999px;
+}
+
+/* Stat Metrics Card */
+.stat-card {
+    -fx-background-color: linear-gradient(to bottom right, #171e2e, #0f1422);
+    -fx-background-radius: 12px;
+    -fx-border-color: #27334d;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 8, 0, 0, 2);
+}
+
+.stat-value {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #ffffff;
+}
+
+.stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #94a3b8;
+}
