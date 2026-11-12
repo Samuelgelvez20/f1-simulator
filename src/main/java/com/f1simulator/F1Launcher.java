@@ -11,3 +11,4 @@ public class F1Launcher {
         F1App.main(args);
     }
 }
+

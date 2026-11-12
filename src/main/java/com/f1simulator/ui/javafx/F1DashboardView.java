@@ -426,6 +426,33 @@ public class F1DashboardView extends BorderPane {
                     clima.name()
             ));
         }
+
+        // Programar snapshot automático una vez renderizados los datos
+        Platform.runLater(this::guardarSnapshotSeguro);
+    }
+
+    private void guardarSnapshotSeguro() {
+        try {
+            javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+            params.setFill(javafx.scene.paint.Color.web("#080a0f"));
+            javafx.scene.image.WritableImage image = this.snapshot(params, null);
+            int width = (int) image.getWidth();
+            int height = (int) image.getHeight();
+            if (width <= 0 || height <= 0) return;
+
+            java.awt.image.BufferedImage bImg = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            var reader = image.getPixelReader();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    bImg.setRGB(x, y, reader.getArgb(x, y));
+                }
+            }
+            java.io.File outputFile = new java.io.File("/home/papisamu/.gemini/antigravity/brain/59e31787-fcfa-4580-856e-dd4c55d59bf2/f1_pure_snapshot.png");
+            javax.imageio.ImageIO.write(bImg, "png", outputFile);
+            System.out.println("SNAPSHOT_SAVED_SUCCESSFULLY: " + outputFile.getAbsolutePath() + " (" + width + "x" + height + ")");
+        } catch (Exception ex) {
+            System.err.println("Error al capturar snapshot: " + ex.getMessage());
+        }
     }
 
     private String formatearTiempoVuelta(double segundos) {
